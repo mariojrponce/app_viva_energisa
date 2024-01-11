@@ -1,20 +1,35 @@
-from __future__ import print_statement
+import json
+import os
+import requests
 import time
-import swagger_client
-from swagger_client.rest import ApiException
-from pprint import pprint
 
-# Configure OAuth2 access token for authorization: strava_oauth
-swagger_client.configuration.access_token = 'fff578aa8583c2d4eb1f7da7d8baa94d138ea7d2'
+# Initial Settings
+client_id = '119672'
+client_secret = '40bd88c5ed94bd6d4c3f6870524f660eb62605a2'
+redirect_uri = 'http://localhost/'
 
-# create an instance of the API class
-api_instance = swagger_client.ActivitiesApi()
-id = 789 # Long | The identifier of the activity.
-includeAllEfforts = true # Boolean | To include all segments efforts. (optional)
+# Authorization URL
+request_url = f'http://www.strava.com/oauth/authorize?client_id={client_id}' \
+                  f'&response_type=code&redirect_uri={redirect_uri}' \
+                  f'&approval_prompt=force' \
+                  f'&scope=profile:read_all,activity:read_all'
 
-try: 
-    # Get Activity
-    api_response = api_instance.getActivityById(id, includeAllEfforts=includeAllEfforts)
-    pprint(api_response)
-except ApiException as e:
-    print("Exception when calling ActivitiesApi->getActivityById: %s\n" % e)
+# User prompt showing the Authorization URL
+# and asks for the code
+print('Click here:', request_url)
+print('Please authorize the app and copy&paste below the generated code!')
+print('P.S: you can find the code in the URL')
+code = input('Insert the code from the url: ')
+
+# Get the access token
+token = requests.post(url='https://www.strava.com/api/v3/oauth/token',
+                       data={'client_id': client_id,
+                             'client_secret': client_secret,
+                             'code': code,
+                             'grant_type': 'authorization_code'})
+
+#Save json response as a variable
+strava_token = token.json()
+
+with open('strava_token.json', 'w') as outfile:
+  json.dump(strava_tokens, outfile)
